@@ -1,3 +1,5 @@
+//This seems to be mainly for Websites
+
 import { Link, Stack } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
