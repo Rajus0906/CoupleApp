@@ -1,50 +1,32 @@
-# Welcome to your Expo app 👋
+# (APP NAME TBD)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+I am building this app at because of the problem my significant other and I had where we would search for hours for a good app to track movies, games, and TV shows, and even plan date ideas, without constant ads, a paywall, or even making a Notion page (which tends to be a hassle at a point). We wanted something easy and convenient. So this app is for people who had the same issues as us. 
 
-## Get started
+This app isn't restricted to just couples though; you can be friends, family, anyone who you want to share movies, shows or even game recommendations to, see how you both feel about something, or just wanting to stay connected with the people you love!!
 
-1. Install dependencies
+## 📱 About The Project
 
-   ```bash
-   npm install
-   ```
+My app is a mobile application built with **React Native** and **Expo**. It allows users to build a digital scrapbook of their shared entertainment experiences. Instead of just rating content individually, users can see what their partner or friends rated, leave comments, and unlock achievements based on their activity.
 
-2. Start the app
+**Current Status:** *In Development (Frontend Phase)*
 
-   ```bash
-   npx expo start
-   ```
+### Key Features (Implemented & Planned)
+* **Profile System:** Customizable profiles with avatars, bio, and stats.
+* **Media Tracking:** Rate and review movies, games, and TV shows.
+* **Top 5 Favorites:** A dedicated section to showcase your all-time favorites.
+* **Gamification:** Unlock "Medals" (like 'Couch Potato' or 'Critic') based on rating milestones.
+* **Shared Views:** See your partner's ratings and compare stats.
+* **Design:** Features a modern "Bento Box" card-style UI with a warm Beige/Brown aesthetic.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠 Tech Stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+* **Framework:** [React Native](https://reactnative.dev/)
+* **Tooling:** [Expo](https://expo.dev/) & Expo Router
+* **Language:** TypeScript
+* **Icons:** Ionicons (@expo/vector-icons)
+* **Navigation:** File-based routing (Expo Router)
 
-## Get a fresh project
+* **Back-End:** Supabase
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
