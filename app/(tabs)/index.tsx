@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from "react-native";
 // connects supabase 
 import { supabase } from '@/utils/supabase';
+import { Link } from 'expo-router';
 
 
 // This is the main (home) screen of the app.
@@ -38,6 +39,10 @@ export default function Index() {
     <View style={styles.container}>
       <Text style={styles.title}>Database Status</Text>
       <Text style={styles.status}>{connectionStatus}</Text>
+
+      <Link href="/login" style={{ fontSize: 18, color: '#5c4033', marginTop: 20}}>
+        Go to Login Page
+      </Link>
     </View>
   );
 }
