@@ -1,7 +1,7 @@
+import { supabase } from "@/utils/supabase";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from 'react';
-import { supabase } from "@/utils/supabase";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -13,11 +13,15 @@ export default function RootLayout() {
     supabase.auth.onAuthStateChange((_event, session) => {
 
       // The logic
-      if(session) {
-        //If the user exists, send them to the home page
+      //If there is a session and email is confirmed, then you can go to the home page when making the account
+      if(session?.user?.email_confirmed_at) {
+        //If the user is logged in and verified, send them to the home page
         router.replace('/(tabs)');
       } else {
-        //If the user doesn't exist send them to the login page
+        //If the user doesn't exist or logged in
+        //this covers people who:
+        // - With no account
+        // - Not verified
         router.replace('/login');
       }
     });

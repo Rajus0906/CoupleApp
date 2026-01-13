@@ -1,11 +1,15 @@
 import { supabase } from '@/utils/supabase';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+
 
 export default function LoginScreen() {
     const [email, setEmail] = React.useState(''); 
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
+
+    const router = useRouter();
     
     // Function to Log In
     async function signInWithEmail() {
@@ -76,7 +80,7 @@ export default function LoginScreen() {
                     {loading ? <ActivityIndicator color='#fff'/> : <Text style={styles.loginText}> Sign In</Text>}
                 </Pressable>
 
-                <Pressable style={styles.signupButton} onPress={signUpWithEmail} disabled={loading}>
+                <Pressable style={styles.signupButton} onPress={() => router.push('/register')}>
                     <Text style={styles.signupText}>Create Account</Text>
                 </Pressable>
             </View>
