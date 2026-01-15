@@ -18,8 +18,8 @@ export default function TabLayout () {
                 headerTintColor: '#5C4033',
                 tabBarShowLabel: false,
                 tabBarStyle: {
-                    paddingBottom: 10, // pushes icons downward
-                    height: 65, // optional, gives breathing room
+                    paddingTop: 10, // pushes icons downward
+                    height: 70, // optional, gives breathing room
                     backgroundColor: '#ece0d1',
                 },
             }}
