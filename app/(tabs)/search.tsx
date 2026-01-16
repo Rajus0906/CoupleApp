@@ -1,7 +1,11 @@
 import React from 'react';
 import {
+    ActivityIndicator,
+    FlatList,
+    Image,
     ImageBackground,
-    ScrollView,
+    Linking,
+    RefreshControl,
     StyleSheet,
     Text,
     TextInput,
@@ -9,114 +13,210 @@ import {
     View
 } from 'react-native';
 
+import { fetchTrending, getImageUrl, searchMulti } from '@/services/tmdb';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 
-//Dummy Data (For Now)
-const NEWS_ITEM = [
-    {
-        id: '1',
-        title: 'GTA VI Trailer Leaked?',
-        source: 'IGN - 1h ago',
-        image: 'https://gaming-cdn.com/images/products/2462/orig/grand-theft-auto-vi-pc-rockstar-cover.jpg?v=1762511430', // Gaming Image
-        tag: 'BREAKING'
-    },
-    {
-        id: '2',
-        title: 'Avengers Doomsday?',
-        source: 'IGN - 5h ago',
-        image: 'https://cdn.marvel.com/content/2x/avengersdoomsday_lob_mas_mob_02.jpg', // Movie Image
-        tag: 'BREAKING'
-    },
-    {
-        id: '3',
-        title: 'Cyberpunk Update Fixes Game',
-        source: 'IGN - 10h ago',
-        image: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/644eb087007768417a847e52c38eeaf34b57fd12/page_bg_raw.jpg?t=1768304190', // Cyberpunk Image
-        tag: 'UPDATE'
-    }
-];
+const CATEGORIES = ['All', 'Movies', 'TV Shows', 'Games']
 
-const CATEGORIES = ['All', 'Movies', 'TV Shows', 'Games'];
 
 export default function SearchScreen() {
+    const router = useRouter(); // For navigating to detail screen
+
+    //UI states
     const [activeCategory, setActiveCategory] = React.useState('All');
     const [searchText, setSearchText] = React.useState('');
 
-    return (
-        <View style={styles.container} >
+    // STATE for Data 
+    const [newsData, setNewsData] = React.useState<any[]>([]);
+    const [searchResults, setSearchResults] = React.useState<any[]>([]) // For a seperate list for search
+    const [loading, setLoading] = React.useState(true);
+    const [page, setPage] = React.useState(1); // Tracks the current page
+    const [refreshing, setRefreshing] = React.useState(false);
 
-            {/* Header Section*/}
-            <View style={styles.headerContainer}>
-                {/* Search Bar Section*/}
-                <View style={styles.searchBar}>
-                    <Ionicons name='search' size={20} color='#8d6e63' style={{ marginRight: 10}}/>
-                    <TextInput
-                        placeholder='Search'
-                        placeholderTextColor='#8d6e63'
-                        style={styles.searchInput}
-                        value={searchText}
-                        onChangeText={setSearchText}
-                    />
-                </View>
+    // Load Initial 'News' (Trending)
+    React.useEffect(() => {
+        loadNews(1);
+    }, []);
 
-                {/* Filter Pills Section*/}
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.pillsList}
-                >
-                    {CATEGORIES.map((cat) => (
-                        <TouchableOpacity
-                            key={cat}
-                            onPress={() => setActiveCategory(cat)}
-                            style={[
-                                styles.pill,
-                                activeCategory === cat ? styles.pillActive : styles.pillInactive
-                            ]}
-                        >
-                            <Text style={[
-                                styles.pillText,
-                                activeCategory === cat ? styles.pillTextActive : styles.pillTextInactive
-                            ]}>
-                                {cat}
-                            </Text>
-                        </TouchableOpacity>
-                        
-                    ))}
-                </ScrollView>
-            </View>
+    const loadNews = async (pageNum: number, shouldRefresh: boolean = false) => {
+        if (loading) return;
+        setLoading(true);
 
-            {/* News Feed */}
-            <ScrollView contentContainerStyle={styles.feedContainer}>
-                {NEWS_ITEM.map((item) => (
-                    <View key={item.id} style={styles.card}>
-                        <ImageBackground
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            imageStyle={{ borderRadius: 16 }}
-                        >
-                            {/* The Breaking Header for the news */}
-                            <View style={styles.tagContainer}>
-                                <Text style={styles.tagText}>{item.tag}</Text>
-                            </View>
+        const data = await fetchTrending(pageNum);
 
-                            {/* The Gradiemt Fade for text at the bottom of the news image */}
-                            <LinearGradient
-                                colors={['transparent', 'rgba(0,0,0,0.8)']}
-                                style={styles.gradient}
-                            >
-                                <Text style={styles.cardTitle}>{item.title}</Text>
-                                <Text style={styles.cardSource}>{item.source}</Text>
-                            </LinearGradient>
-                        </ImageBackground>
+        if (data && data.results) {
+            if(shouldRefresh){
+                setNewsData(data.results); // Replaces list if refreshing
+            } else {
+                setNewsData(prev => [...prev, ...data.results]);
+            }
+            setPage(pageNum);
+        }
+        setLoading(false);
+        setRefreshing(false);
+    };
+
+    // This Code handles Searching
+    const handleSearch = async (text: string) => {
+        setSearchText(text);
+        if (text.length > 2) {
+            // Only start searching when they put more than 2 letters
+            const data = await searchMulti(text);
+            if (data && data.results) {
+                setSearchResults(data.results);
+            }
+        } else {
+            // If they erase it go back to the trending screen
+            setSearchResults([]);
+        }
+    };
+
+    // Clicking on the news to open it up
+    const handleNewsClick = (itemId: number, type: string) => {
+        // TMDB cant give us direct link click, so it will send them to the TMDB page
+        const mediaType = type || 'movie';
+        Linking.openURL(`https://www.themoviedb.org/${mediaType}/${itemId}`);
+    };
+
+    const handleSearchClick = (item: any) => {
+        // Search Results open a detail screen to add to watch list
+        router.push({
+            pathname: "/profile",
+            params: { id: item.id, type: item.media_type || 'movie'}
+        });
+    };
+
+    // Render Items
+    const renderNewsItem = ({ item }: { item: any }) => (
+        <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.card}
+            onPress={() => handleNewsClick(item.id, item.media_type)}
+        >
+            <ImageBackground
+                source={{ uri: getImageUrl(item.backdrop_path || item.poster_path) }}
+                style={styles.cardImage}
+                imageStyle={{ borderRadius: 16 }}
+            >
+                {item.vote_average > 7.5 && (
+                    <View style={styles.tagContainer}>
+                        <Text style={styles.tagText}>TRENDING</Text>
                     </View>
-                ))}
-                {/* Adding padding at the bottom */}
-                <View style={{ height: 100 }}/>
-            </ScrollView>
-        </View>
+                )}
+
+                <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.9)']}
+                style={styles.gradient}
+                >
+                    <Text style={styles.cardTitle} numberOfLines={2}>
+                        {item.title || item.name}
+                    </Text>
+                    <Text style={styles.cardSource}>
+                    Rating: {item.vote_average?.toFixed(1)} • {item.release_date || item.first_air_date}
+                    </Text>
+                </LinearGradient>
+            </ImageBackground>
+        </TouchableOpacity>
     );
+
+    const renderSearchItem = ({ item }: { item: any }) => (
+        <TouchableOpacity
+            style={styles.searchResultItem}
+            onPress={() => handleSearchClick(item)}
+        >
+            <Image
+                source={{ uri: getImageUrl(item.poster_path, 'w92') }}
+                style={styles.searchThumbnail}
+            />
+            <View style={styles.searchMeta}>
+                <Text style={styles.searchTitle} numberOfLines={1}> {item.title || item.name}</Text>
+                <Text style={styles.searchSubtitle}>
+                {item.media_type === 'tv' ? 'TV Show' : 'Movie'} • {item.release_date?.split('-')[0] || item.first_air_date?.split('-')[0] || 'N/A'}
+                </Text>
+            </View>
+            <Ionicons name='chevron-forward' size={20} color='#8d6e63'/>
+        </TouchableOpacity>
+    );
+
+    return (
+        <View style={styles.container}>
+
+          {/* HEADER: Search Bar + Pills */}
+          <View style={styles.headerContainer}>
+            <View style={styles.searchBar}>
+              <Ionicons name="search" size={20} color="#8D6E63" style={{ marginRight: 10 }} />
+              <TextInput
+                placeholder="Find movies, games..."
+                placeholderTextColor="#8D6E63"
+                style={styles.searchInput}
+                value={searchText}
+                onChangeText={handleSearch}
+              />
+              {searchText.length > 0 && (
+                <TouchableOpacity onPress={() => { setSearchText(''); setSearchResults([]); }}>
+                  <Ionicons name="close-circle" size={20} color="#8D6E63" />
+                </TouchableOpacity>
+              )}
+            </View>
+    
+            {/* Categories (Only show if NOT searching) */}
+            {searchText.length === 0 && (
+              <View style={styles.pillsList}>
+                 {CATEGORIES.map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    onPress={() => setActiveCategory(cat)}
+                    style={[styles.pill, activeCategory === cat ? styles.pillActive : styles.pillInactive]}
+                  >
+                    <Text style={[styles.pillText, activeCategory === cat ? styles.pillTextActive : styles.pillTextInactive]}>
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+    
+          {/* CONTENT AREA */}
+          {searchText.length > 0 ? (
+            // --- SEARCH RESULTS LIST (Goodreads Style) ---
+            <View style={styles.searchResultsContainer}>
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderSearchItem}
+                keyboardShouldPersistTaps="handled"
+              />
+            </View>
+          ) : (
+            // --- NEWS FEED (Infinite Scroll) ---
+            <FlatList
+              data={newsData}
+              keyExtractor={(item, index) => item.id.toString() + index} // Unique key fix
+              renderItem={renderNewsItem}
+              contentContainerStyle={styles.feedContainer}
+              
+              // Infinite Scroll Props
+              onEndReached={() => loadNews(page + 1)} 
+              onEndReachedThreshold={0.5} // Load when halfway down the last item
+              
+              // Pull to Refresh Props
+              refreshControl={
+                <RefreshControl 
+                  refreshing={refreshing} 
+                  onRefresh={() => { setRefreshing(true); loadNews(1, true); }}
+                  tintColor="#5C4033" // Spinner color
+                />
+              }
+              
+              // Footer Loader
+              ListFooterComponent={loading ? <ActivityIndicator size="small" color="#5C4033" /> : null}
+            />
+          )}
+        </View>
+      );
 }
 
 const styles = StyleSheet.create ({
@@ -237,4 +337,43 @@ const styles = StyleSheet.create ({
         fontStyle: 'italic',
     },
 
+    //Search Drop Down Style Design
+    searchResultsContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(236, 224, 209, 0.95)',
+        paddingHorizontal: 20,
+    },
+    searchResultItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        padding: 10,
+        borderRadius: 12,
+        marginBottom: 10,
+
+        //Shadow
+        shadowColor: '#000',
+        shadowOpacity: 0.05,
+        elevation: 1,
+    },
+    searchThumbnail: {
+        width: 50,
+        height: 75,
+        borderRadius: 8,
+        backgroundColor: '#DDD',
+    },
+    searchMeta: {
+        flex: 1,
+        marginLeft: 15,
+    },
+    searchTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#5c4033',
+        marginBottom: 4,
+    },
+    searchSubtitle: {
+        fontSize: 12,
+        color: '#8d6e63',
+    },
 });
