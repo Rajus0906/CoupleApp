@@ -16,8 +16,22 @@ const apiCall = async (endpoint: string, params: string = '') => {
 // Gets Trending Movies/TV (This acts as your 'News')
 export const fetchTrending = async (page: number = 1) => {
     // Fetches Items Trending Today
-    return await apiCall('trending/all/day', `&page=${page}`);
+    const today = new Date().toISOString().split('T')[0];
+
+    // We calculate a date 6 months ago to ensure we don't get ANCIENT movies even if they are "newly added"
+  const sixMonthsAgoDate = new Date();
+  sixMonthsAgoDate.setMonth(sixMonthsAgoDate.getMonth() - 6);
+  const sixMonthsAgo = sixMonthsAgoDate.toISOString().split('T')[0];
+
+  return await apiCall('discover/movie', 
+    `&page=${page}` +
+    `&sort_by=primary_release_date.desc` + // Sort by Date (Newest)
+    `&primary_release_date.lte=${today}` + // Must be released by Today (No future stuff)
+    `&primary_release_date.gte=${sixMonthsAgo}` + // Don't show stuff older than 6 months
+    `&vote_count.gte=20` // Filter out "trash" (must have at least 20 votes)
+  );
 };
+
 
 // Allows the user to search for anything
 export const searchMulti = async (query: string) => {

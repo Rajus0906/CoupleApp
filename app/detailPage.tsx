@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from "react-native";
 
@@ -7,6 +8,9 @@ import { StyleSheet, View } from "react-native";
 export default function Index() {
   return (
     <View style={styles.container}>
+        <Link href="/profile" style={{ fontSize: 18, color: '#5c4033'}}>
+        Go To Profile
+        </Link>
     </View>
   );
 }
@@ -14,7 +18,7 @@ export default function Index() {
 const styles = StyleSheet.create ({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#ece0d1',
   },
