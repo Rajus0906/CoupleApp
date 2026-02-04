@@ -68,7 +68,7 @@ export default function RegisterScreen() {
         >
                 
             <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.title}>Join The Dark Side of the Force</Text>
+                <Text style={styles.title}>Join Now!</Text>
                 <Text style={styles.subtitles}>Create your profile to get started</Text>
 
                 <View style={styles.inputContainer}>
@@ -173,7 +173,7 @@ export default function RegisterScreen() {
     container: {
         backgroundColor: '#ece0d1',
         flexGrow: 1,
-        padding: 30,
+        padding: 50,
         justifyContent: 'center',
     },
     title: {
@@ -181,6 +181,7 @@ export default function RegisterScreen() {
         color: '#5c4033',
         textAlign: 'center',
         fontWeight: 'bold',
+        paddingTop: 20,
     },
     subtitles: {
         fontSize: 14,
