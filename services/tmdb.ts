@@ -45,3 +45,11 @@ export const getImageUrl = (path: string | null, size: string = 'w500') => {
     if (!path) return 'https://via.placeholder.com/500x750.png?text=No+Image';
     return `https://image.tmdb.org/t/p/${size}${path}`;
 };
+
+export const fetchDetails = async (id: number, type: string ) => {
+    return await apiCall(`${type}/${id}`, '&append_to_response=release_dates,content_ratings');    
+};
+
+export const fetchCredits = async (id: number, type: string) =>{
+    return await apiCall (`${type}/${id}/credits`)
+};
